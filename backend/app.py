@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import random
 from words_data import WORDS
+from streamlit_mic_recorder import mic_recorder
 
 st.set_page_config(page_title="SpeakUp", page_icon="🎤")
 st.title("SpeakUp – 1 Minute Vocabulary Challenge")
@@ -81,13 +82,24 @@ elif st.session_state.stage == "thinking":
     st.rerun()
 
 elif st.session_state.stage == "speaking":
-    st.success("Speak now!")
+    st.success("Speak now! 60 seconds")
+
+    audio = mic_recorder(start_prompt="🎙️ Start Recording", stop_prompt="⏹️ Stop Recording", key="speak_recorder")
+
     circular_timer(60, "Speak Time")
-    st.session_state.stage = "done"
-    st.rerun()
+
+    if audio:
+        st.session_state.recorded_audio = audio["bytes"]
+        st.audio(audio["bytes"])
+
+    if st.button("Finish"):
+        st.session_state.stage = "done"
+        st.rerun()
 
 elif st.session_state.stage == "done":
-    st.write("Time's up! (Recording logic comes next)")
+    st.write("Time's up! (AI analysis coming next)")
+    if "recorded_audio" in st.session_state:
+        st.audio(st.session_state.recorded_audio)
     if st.button("Try Another Word"):
         st.session_state.stage = "idle"
         st.rerun()
