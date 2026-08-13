@@ -3,7 +3,7 @@
 A speech practice app that gives you a random difficult word, records you speaking about it for 1 minute, and uses AI to analyze fluency, grammar, pronunciation, confidence, vocabulary, and filler words.
 
 ## Tech Stack
-- Frontend: React
+- Frontend: streamlit
 - Backend: FastAPI
 - Database: PostgreSQL
 - AI: Whisper (transcription) + LLM (analysis)
