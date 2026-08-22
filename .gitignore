@@ -18,3 +18,5 @@ build/
 postgresql password:Himanshu123
 
 .env
+
+recordings/

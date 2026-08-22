@@ -3,11 +3,18 @@ import time
 import os
 import random
 import random as rnd
+import whisper
 from words_data import WORDS
 from streamlit_mic_recorder import mic_recorder
 from auth import signup, login, get_profile, update_profile
 
 st.set_page_config(page_title="SpeakUp", page_icon="🎤")
+
+
+@st.cache_resource
+def load_whisper_model():
+    return whisper.load_model("base")
+
 
 # ---------------- AUTH GATE (front page) ----------------
 if "logged_in" not in st.session_state:
@@ -262,7 +269,7 @@ def score_to_grade(overall):
 if st.session_state.stage == "idle":
     if st.button("Start Preparation"):
         st.session_state.stage = "prep"
-        for key in ["prep_placeholder", "recorded_audio", "scores", "speak_timer_start"]:
+        for key in ["prep_placeholder", "recorded_audio", "scores", "speak_timer_start", "transcript"]:
             if key in st.session_state:
                 del st.session_state[key]
         st.rerun()
@@ -351,6 +358,16 @@ elif st.session_state.stage == "done":
 
     if "recorded_audio" in st.session_state:
         st.audio(st.session_state.recorded_audio)
+
+    if "transcript" not in st.session_state and "audio_filepath" in st.session_state:
+        with st.spinner("Transcribing your speech..."):
+            model = load_whisper_model()
+            result = model.transcribe(st.session_state.audio_filepath)
+            st.session_state.transcript = result["text"]
+
+    if "transcript" in st.session_state:
+        st.markdown("**What you said:**")
+        st.write(st.session_state.transcript)
 
     if "scores" not in st.session_state:
         st.session_state.scores = generate_mock_scores()
